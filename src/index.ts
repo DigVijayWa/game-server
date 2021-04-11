@@ -2,7 +2,7 @@ import express from "express";
 import expressWs from "express-ws";
 import WebSocket, { Server /* etc */ } from "ws";
 
-import { ConnectedClients, PlayerMessage } from "./types/Types";
+import { ConnectedClients, Packet } from "./types/Types";
 import { getDataFromMessage, playerMessageToString } from "./utility/Utility";
 
 const { app, getWss, applyTo } = expressWs(express());
@@ -51,8 +51,9 @@ app.ws("/connect", (ws, req) => {
         {
           type: "PLAYER_LEFT",
           correlationId: new Date().getTime(),
-          leftPlayer: playerData.playerId,
+          id: playerData.playerId,
           length: message.toString().length,
+          data: 
         },
         connectedClients
       );
@@ -62,8 +63,9 @@ app.ws("/connect", (ws, req) => {
     {
       type: "PLAYER_JOINED",
       correlationId: new Date().getTime(),
-      joinedPlayer: req.query.id as string,
+      id: req.query.id as string,
       length: req.query.id.toString().length,
+      data: 
     },
     connectedClients
   );
@@ -83,7 +85,7 @@ setInterval(()=> {
   // tslint:disable-next-line:no-console
   console.log("alive: %s", connectedClients);
 
-}, 3500);
+}, 4000);
 
 
 setInterval(()=> {
@@ -96,7 +98,7 @@ setInterval(()=> {
 
 }, 1000);
 
-const sendAll = (packet: PlayerMessage, clients: ConnectedClients[]) => {
+const sendAll = (packet: Packet, clients: ConnectedClients[]) => {
   clients.forEach((item) => item.webSocket.send(playerMessageToString(packet)));
 };
 
