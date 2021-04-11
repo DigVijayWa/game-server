@@ -11,9 +11,9 @@ const { app, getWss, applyTo } = expressWs(express());
 
 const port = 8080;
 
-let connectedClients: ConnectedClients[] = [];
+const connectedClients: ConnectedClients[] = [];
 
-let connectedClientList = new ConnectedClientList([]);
+const connectedClientList = new ConnectedClientList([]);
 
 app.ws("/connect", (ws, req) => {
   // push the upcoming websocket connection to the existing clientList.
