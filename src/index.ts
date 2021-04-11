@@ -37,81 +37,44 @@ app.ws("/connect", (ws, req) => {
 
     const playerData = await getDataFromMessage(message.toString());
 
-    /*sendAll(
-      {
-        type: "PACKET",
-        correlationId: new Date().getTime(),
-        id: playerData.playerId,
-        data: message.toString(),
-        length: message.toString().length,
-      },
-      connectedClients
-    );*/
-
     processMessage(message.toString(), connectedClientList);
   });
 
   ws.on("close", async (message) => {
+    const playerData = await getDataFromMessage(message.toString());
 
-      const playerData = await getDataFromMessage(message.toString());
-
-      connectedClients = await removeConnectedClient(
-        playerData.playerId,
-        connectedClients
-      );
-
-      processMessage(message.toString(), connectedClientList);
-
-      /*sendAll(
-        {
-          type: "PLAYER_LEFT",
-          correlationId: new Date().getTime(),
-          id: playerData.playerId,
-          length: message.toString().length,
-          data: 
-        },
-        connectedClients
-      );*/
+    processMessage(message.toString(), connectedClientList);
   });
 });
 
+setInterval(() => {
+  const closedClients = connectedClientList.connectedClients.filter(
+    (item) => item.validity < 10
+  );
 
-setInterval(()=> {
-  const closedClients = connectedClientList.connectedClients.filter(item => item.validity < 10);
-
-  closedClients.forEach(item => item.webSocket.close());
+  closedClients.forEach((item) => item.webSocket.close());
 
   // tslint:disable-next-line:no-console
   console.log("removed: %s", closedClients);
 
-  connectedClientList.setConnectedClientList(connectedClientList.connectedClients.filter(item => item.validity >= 10));
+  connectedClientList.setConnectedClientList(
+    connectedClientList.connectedClients.filter((item) => item.validity >= 10)
+  );
 
   // tslint:disable-next-line:no-console
   console.log("alive: %s", connectedClients);
-
 }, 4000);
 
-
-setInterval(()=> {
-  connectedClientList.setConnectedClientList(connectedClientList.connectedClients.map(item => {
-    return {
-      ...item,
-      validity: item.validity-1000
-    }
-  }));
-
+setInterval(() => {
+  connectedClientList.setConnectedClientList(
+    connectedClientList.connectedClients.map((item) => {
+      return {
+        ...item,
+        validity: item.validity - 1000,
+      };
+    })
+  );
 }, 1000);
-
-const sendAll = (packet: Packet, clients: ConnectedClients[]) => {
-  clients.forEach((item) => item.webSocket.send(playerMessageToString(packet)));
-};
-
-const removeConnectedClient = async (
-  connectedClientId: string,
-  clients: ConnectedClients[]
-) => {
-  return await clients.splice(clients.findIndex(item => item.id === connectedClientId), 1);
-};
 
 // adding websocket.
 
