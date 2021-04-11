@@ -3,7 +3,7 @@ import expressWs from "express-ws";
 import WebSocket, { Server /* etc */ } from "ws";
 
 import { ConnectedClients, PlayerMessage } from "./types/Types";
-import { playerMessageToString } from "./utility/Utility";
+import { getDataFromMessage, playerMessageToString } from "./utility/Utility";
 
 const { app, getWss, applyTo } = expressWs(express());
 
@@ -17,15 +17,20 @@ app.ws("/connect", (ws, req) => {
     webSocket: ws,
     id: req.query.id as string,
     ipAddress: req.connection.remoteAddress,
+    validity: 3000,
   });
 
-  ws.on("message", (message) => {
+  ws.on("message", async (message) => {
     // tslint:disable-next-line:no-console
     console.log("received: %s", message);
+
+    const playerData = await getDataFromMessage(message.toString());
+
     sendAll(
       {
         type: "PACKET",
-        id: new Date().getTime(),
+        correlationId: new Date().getTime(),
+        id: playerData.playerId,
         data: message.toString(),
         length: message.toString().length,
       },
@@ -33,35 +38,63 @@ app.ws("/connect", (ws, req) => {
     );
   });
 
-  ws.on("close", (message) => {
-    (async () => {
+  ws.on("close", async (message) => {
+
+      const playerData = await getDataFromMessage(message.toString());
+
       connectedClients = await removeConnectedClient(
-        message.toString(),
+        playerData.playerId,
         connectedClients
       );
-      
+
       sendAll(
         {
           type: "PLAYER_LEFT",
-          id: new Date().getTime(),
-          leftPlayer: message.toString(),
+          correlationId: new Date().getTime(),
+          leftPlayer: playerData.playerId,
           length: message.toString().length,
         },
         connectedClients
       );
-    })();
   });
 
   sendAll(
     {
       type: "PLAYER_JOINED",
-      id: new Date().getTime(),
+      correlationId: new Date().getTime(),
       joinedPlayer: req.query.id as string,
       length: req.query.id.toString().length,
     },
     connectedClients
   );
 });
+
+
+setInterval(()=> {
+  const closedClients = connectedClients.filter(item => item.validity < 10);
+
+  closedClients.forEach(item => item.webSocket.close());
+
+  // tslint:disable-next-line:no-console
+  console.log("removed: %s", closedClients);
+
+  connectedClients = connectedClients.filter(item => item.validity >= 10);
+
+  // tslint:disable-next-line:no-console
+  console.log("alive: %s", connectedClients);
+
+}, 3500);
+
+
+setInterval(()=> {
+  connectedClients = connectedClients.map(item => {
+    return {
+      ...item,
+      validity: item.validity-1000
+    }
+  });
+
+}, 1000);
 
 const sendAll = (packet: PlayerMessage, clients: ConnectedClients[]) => {
   clients.forEach((item) => item.webSocket.send(playerMessageToString(packet)));
