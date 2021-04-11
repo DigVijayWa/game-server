@@ -40,7 +40,8 @@ export const playerMessageToString = (playerMessage: Packet) => {
 };
 
 export const playerDataToString = (playerData: PlayerData) => {
-  return `{ 
+  return `{
+      "name": "${playerData.name}", 
       "xPosition": ${playerData.xPosition}, 
       "yPosition": ${playerData.yPosition}
     }`;

@@ -13,6 +13,7 @@ export type Packet = {
 };
 
 export type PlayerData = {
+  name: string,
   xPosition: number,
   yPosition: number,
 };
