@@ -62,7 +62,7 @@ setInterval(() => {
   );
 
   // tslint:disable-next-line:no-console
-  console.log("alive: %s", connectedClients);
+  console.log("alive: %s", connectedClientList.connectedClients);
 }, 4000);
 
 setInterval(() => {
