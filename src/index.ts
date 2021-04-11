@@ -5,6 +5,7 @@ import WebSocket, { Server /* etc */ } from "ws";
 import { ConnectedClients, Packet } from "./types/Types";
 import { getDataFromMessage, playerMessageToString } from "./utility/Utility";
 import { ConnectedClientList } from "./network/ConnectedClientList";
+import { processMessage } from "./processor/MessageProcessor";
 
 const { app, getWss, applyTo } = expressWs(express());
 
@@ -36,7 +37,7 @@ app.ws("/connect", (ws, req) => {
 
     const playerData = await getDataFromMessage(message.toString());
 
-    sendAll(
+    /*sendAll(
       {
         type: "PACKET",
         correlationId: new Date().getTime(),
@@ -45,7 +46,9 @@ app.ws("/connect", (ws, req) => {
         length: message.toString().length,
       },
       connectedClients
-    );
+    );*/
+
+    processMessage(message.toString(), connectedClientList);
   });
 
   ws.on("close", async (message) => {
@@ -57,7 +60,9 @@ app.ws("/connect", (ws, req) => {
         connectedClients
       );
 
-      sendAll(
+      processMessage(message.toString(), connectedClientList);
+
+      /*sendAll(
         {
           type: "PLAYER_LEFT",
           correlationId: new Date().getTime(),
@@ -66,31 +71,20 @@ app.ws("/connect", (ws, req) => {
           data: 
         },
         connectedClients
-      );
+      );*/
   });
-
-  sendAll(
-    {
-      type: "PLAYER_JOINED",
-      correlationId: new Date().getTime(),
-      id: req.query.id as string,
-      length: req.query.id.toString().length,
-      data: 
-    },
-    connectedClients
-  );
 });
 
 
 setInterval(()=> {
-  const closedClients = connectedClients.filter(item => item.validity < 10);
+  const closedClients = connectedClientList.connectedClients.filter(item => item.validity < 10);
 
   closedClients.forEach(item => item.webSocket.close());
 
   // tslint:disable-next-line:no-console
   console.log("removed: %s", closedClients);
 
-  connectedClients = connectedClients.filter(item => item.validity >= 10);
+  connectedClientList.setConnectedClientList(connectedClientList.connectedClients.filter(item => item.validity >= 10));
 
   // tslint:disable-next-line:no-console
   console.log("alive: %s", connectedClients);
@@ -99,12 +93,12 @@ setInterval(()=> {
 
 
 setInterval(()=> {
-  connectedClients = connectedClients.map(item => {
+  connectedClientList.setConnectedClientList(connectedClientList.connectedClients.map(item => {
     return {
       ...item,
       validity: item.validity-1000
     }
-  });
+  }));
 
 }, 1000);
 

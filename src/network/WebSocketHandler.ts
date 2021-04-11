@@ -1,18 +1,11 @@
 import { playerMessageToString } from "../utility/Utility";
 import { Packet } from "../types/Types";
-import { ConnectedClients } from "../types/Types";
+import { ConnectedClientList } from "./ConnectedClientList";
 
-export const broadcastMessage = (connectedClients: ConnectedClients[], message: Packet) => {
-    connectedClients.forEach((item) => item.webSocket.send(playerMessageToString(message)));
+export const broadcastMessage = (connectedClientList: ConnectedClientList, message: Packet) => {
+    connectedClientList.connectedClients.forEach((item) => item.webSocket.send(playerMessageToString(message)));
 }
 
-export const broadcastMessageString = (connectedClients: ConnectedClients[], message: string) => {
-    connectedClients.forEach((item) => item.webSocket.send(message));
+export const broadcastMessageString = (connectedClientList: ConnectedClientList, message: string) => {
+    connectedClientList.connectedClients.forEach((item) => item.webSocket.send(message));
 }
-
-export const removeConnectedClient = async (
-    connectedClientId: string,
-    connectedClients: ConnectedClients[]
-  ) => {
-    return await connectedClients.filter(item=> !(item.id === connectedClientId));
-  };

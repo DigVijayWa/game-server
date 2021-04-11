@@ -53,4 +53,5 @@ export class ConnectedClientList {
   ) {
     this.connectedClients = connectedClients
   }
+
 }
