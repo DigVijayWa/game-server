@@ -15,7 +15,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.1",
-    "express-ws": "^4.0.0"
+    "express-ws": "^4.0.0",
+    "ts-pattern": "^3.1.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",

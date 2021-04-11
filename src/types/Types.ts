@@ -1,20 +1,20 @@
 import WebSocket, { Server /* etc */ } from "ws";
 
 export type Packet = {
-  type: string;
+  type: 'PACKET';
   data: string;
   id: number;
   length: number;
 };
 export type PlayerJoined = {
-  type: string;
+  type: 'PLAYER_JOINED';
   joinedPlayer: string,
   id: number;
   length: number;
 };
 
 export type PlayerLeft = {
-  type: string;
+  type: 'PLAYER_LEFT';
   leftPlayer: string,
   id: number;
   length: number;
