@@ -39,8 +39,7 @@ app.ws("/connect", (ws, req) => {
         message.toString(),
         connectedClients
       );
-      // tslint:disable-next-line:no-console
-      console.log("clients: ", connectedClients);
+      
       sendAll(
         {
           type: "PLAYER_LEFT",
@@ -72,7 +71,7 @@ const removeConnectedClient = async (
   connectedClientId: string,
   clients: ConnectedClients[]
 ) => {
-  return await clients.filter((item) => !(item.id === connectedClientId));
+  return await clients.splice(clients.findIndex(item => item.id === connectedClientId), 1);
 };
 
 // adding websocket.
