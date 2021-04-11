@@ -7,10 +7,10 @@ export const playerMessageToString = (playerMessage: Packet) => {
       { type: "PACKET" },
       (res) =>
         `{
-            "correlationId": ${res.correlationId}, 
-            "type": ${res.type}, 
-            "id": "${res.id}", 
-            "data": ${playerDataToString(res.data)}, 
+            "correlationId": ${res.correlationId},
+            "type": ${res.type},
+            "id": "${res.id}",
+            "data": ${playerDataToString(res.data)},
             "length": ${playerDataToString(res.data).length}
         }`
     )
@@ -18,10 +18,10 @@ export const playerMessageToString = (playerMessage: Packet) => {
       { type: "PLAYER_JOINED" },
       (res) =>
         `{
-            "type": ${res.type}, 
-            "correlationId": ${res.correlationId}, 
-            "id": "${res.id}", 
-            "length": ${res.id.length}, 
+            "type": ${res.type},
+            "correlationId": ${res.correlationId},
+            "id": "${res.id}",
+            "length": ${res.id.length},
             "data": ${playerDataToString(res.data)}
         }`
     )
@@ -29,10 +29,10 @@ export const playerMessageToString = (playerMessage: Packet) => {
       { type: "PLAYER_LEFT" },
       (res) =>
         `{
-            "type": ${res.type}, 
-            "correlationId": ${res.correlationId}, 
-            "id": "${res.id}", 
-            "length": ${res.id.length}, 
+            "type": ${res.type},
+            "correlationId": ${res.correlationId},
+            "id": "${res.id}",
+            "length": ${res.id.length},
             "data": ${playerDataToString(res.data)}
         }`
     )
@@ -41,8 +41,8 @@ export const playerMessageToString = (playerMessage: Packet) => {
 
 export const playerDataToString = (playerData: PlayerData) => {
   return `{
-      "name": "${playerData.name}", 
-      "xPosition": ${playerData.xPosition}, 
+      "name": "${playerData.name}",
+      "xPosition": ${playerData.xPosition},
       "yPosition": ${playerData.yPosition}
     }`;
 };
