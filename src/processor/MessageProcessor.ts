@@ -5,10 +5,18 @@ import {
 } from "../network/WebSocketHandler";
 import { ConnectedClients } from "../types/Types";
 
-const processPlayerJoinedAndPacketMessage = (
+const processPlayerJoinedAndPacketMessage = async (
   data: string,
   connectedClientList: ConnectedClientList
 ) => {
+  const playerData = await JSON.parse(data);
+
+  const updatedClientList = connectedClientList.connectedClients.map((item) =>
+    item.id === playerData.id ? { ...item, validity: 10000 } : item
+  );
+
+  connectedClientList.setConnectedClientList(updatedClientList);
+
   broadcastMessageString(connectedClientList, data);
 };
 const processPlayerLeftMessage = async (

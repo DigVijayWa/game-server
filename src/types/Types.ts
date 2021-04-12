@@ -14,8 +14,8 @@ export type Packet = {
 
 export type PlayerData = {
   name: string,
-  xPosition: number,
-  yPosition: number,
+  xInput: number,
+  yInput: number,
 };
 
 export type ConnectedClients = {

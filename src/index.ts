@@ -11,24 +11,15 @@ const { app, getWss, applyTo } = expressWs(express());
 
 const port = 8080;
 
-const connectedClients: ConnectedClients[] = [];
-
 const connectedClientList = new ConnectedClientList([]);
 
 app.ws("/connect", (ws, req) => {
-  // push the upcoming websocket connection to the existing clientList.
-  connectedClients.push({
-    webSocket: ws,
-    id: req.query.id as string,
-    ipAddress: req.connection.remoteAddress,
-    validity: 3000,
-  });
 
   connectedClientList.addConnectedClients({
     webSocket: ws,
     id: req.query.id as string,
     ipAddress: req.connection.remoteAddress,
-    validity: 3000,
+    validity: 10000,
   });
 
   ws.on("message", async (message) => {
