@@ -1,52 +1,50 @@
+import { decodePlayerMessage, encodePlayerMessage } from "../utility/Utility";
 import { ConnectedClientList } from "../network/ConnectedClientList";
 import {
   broadcastMessage,
   broadcastMessageString,
 } from "../network/WebSocketHandler";
-import { ConnectedClients } from "../types/Types";
+import { ConnectedClients, Packet } from "../types/Types";
 
 const processPlayerJoinedAndPacketMessage = async (
-  data: string,
+  data: Packet,
   connectedClientList: ConnectedClientList
 ) => {
-  const playerData = await JSON.parse(data);
-
   const updatedClientList = connectedClientList.connectedClients.map((item) =>
-    item.id === playerData.id ? { ...item, validity: 10000 } : item
+    item.id === data.id ? { ...item, validity: 10000 } : item
   );
 
   connectedClientList.setConnectedClientList(updatedClientList);
 
-  broadcastMessageString(connectedClientList, data);
+  broadcastMessageString(connectedClientList, encodePlayerMessage(data));
 };
 const processPlayerLeftMessage = async (
-  data: string,
+  data: Packet,
   connectedClientList: ConnectedClientList
 ) => {
-  const playerData = await JSON.parse(data);
 
   connectedClientList.setConnectedClientList(
     connectedClientList.connectedClients.filter(
-      (item) => !(item.id === playerData.id)
+      (item) => !(item.id === data.id)
     )
   );
 
-  broadcastMessageString(connectedClientList, data);
+  broadcastMessageString(connectedClientList, encodePlayerMessage(data));
 };
 
 export const processMessage = async (
   message: string,
   connectedClientList: ConnectedClientList
 ) => {
-  const data = await JSON.parse(message);
+  const data = await decodePlayerMessage(message);
 
   switch (data.type) {
     case "PLAYER_JOINED":
     case "PACKET":
-      processPlayerJoinedAndPacketMessage(message, connectedClientList);
+      processPlayerJoinedAndPacketMessage(data, connectedClientList);
       break;
     case "PLAYER_LEFT":
-      processPlayerLeftMessage(message, connectedClientList);
+      processPlayerLeftMessage(data, connectedClientList);
       break;
     default:
   }
