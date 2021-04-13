@@ -1,50 +1,72 @@
 import { Packet, PlayerData } from "../types/Types";
 import { match, select } from "ts-pattern";
+import { parse } from "node:path";
 
-export const playerMessageToString = (playerMessage: Packet) => {
+export const encodePlayerMessage = (playerMessage: Packet) => {
   return match(playerMessage)
     .with(
       { type: "PACKET" },
       (res) =>
         `{
             "correlationId": ${res.correlationId},
-            "type": ${res.type},
+            "type": "${res.type}",
             "id": "${res.id}",
-            "data": ${playerDataToString(res.data)},
-            "length": ${playerDataToString(res.data).length}
+            "data": ${encodePlayerData(res.data)},
+            "length": ${encodePlayerData(res.data).length}
         }`
     )
     .with(
       { type: "PLAYER_JOINED" },
       (res) =>
         `{
-            "type": ${res.type},
+            "type": "${res.type}",
             "correlationId": ${res.correlationId},
             "id": "${res.id}",
             "length": ${res.id.length},
-            "data": ${playerDataToString(res.data)}
+            "data": ${encodePlayerData(res.data)}
         }`
     )
     .with(
       { type: "PLAYER_LEFT" },
       (res) =>
         `{
-            "type": ${res.type},
+            "type": "${res.type}",
             "correlationId": ${res.correlationId},
             "id": "${res.id}",
             "length": ${res.id.length},
-            "data": ${playerDataToString(res.data)}
+            "data": ${encodePlayerData(res.data)}
         }`
     )
     .otherwise(() => "INVALID");
 };
 
-export const playerDataToString = (playerData: PlayerData) => {
+export const encodePlayerData = (playerData: PlayerData) => {
   return `{
       "name": "${playerData.name}",
       "xInput": ${playerData.xInput},
       "yInput": ${playerData.yInput}
     }`;
+};
+
+export const decodePlayerMessage = async (message : string) => {
+    
+  const parsedJson = await JSON.parse(message);
+
+  const keyList = ["correlationId","type","id","data","length"];
+
+  const errorKeys = keyList.filter(item => !(item in parsedJson));
+
+  if(errorKeys.length > 0) {
+    throw new Error(`Decoding error occured ${errorKeys}`);
+  }
+
+  return {
+    id: parsedJson.id,
+    type: parsedJson.type,
+    correlationId: parsedJson.correlationId,
+    data: parsedJson.data,
+    length: JSON.stringify(parsedJson.data).length
+  }
 };
 
 export const getDataFromMessage = async (data: string) => {

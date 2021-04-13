@@ -3,7 +3,7 @@ import expressWs from "express-ws";
 import WebSocket, { Server /* etc */ } from "ws";
 
 import { ConnectedClients, Packet } from "./types/Types";
-import { getDataFromMessage, playerMessageToString } from "./utility/Utility";
+import { getDataFromMessage, encodePlayerMessage } from "./utility/Utility";
 import { ConnectedClientList } from "./network/ConnectedClientList";
 import { processMessage } from "./processor/MessageProcessor";
 
