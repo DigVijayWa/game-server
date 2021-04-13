@@ -49,7 +49,7 @@ export const encodePlayerData = (playerData: PlayerData) => {
 };
 
 export const decodePlayerMessage = async (message : string) => {
-    
+
   const parsedJson = await JSON.parse(message);
 
   const keyList = ["correlationId","type","id","data","length"];
