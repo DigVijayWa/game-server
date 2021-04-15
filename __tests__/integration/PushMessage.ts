@@ -8,7 +8,7 @@ import {
 import axios from "axios";
 
 describe("🔥 Test if PACKET is sent across clients", () => {
-  
+
   it("Test server is alive", async () => {
     const checkHealthy = (): Promise<boolean> => {
       return new Promise((resolve, reject) => {
@@ -24,6 +24,7 @@ describe("🔥 Test if PACKET is sent across clients", () => {
   });
 
   it("Test for 2 clients", async () => {
+    jest.setTimeout(10000);
     const idOne = uuid();
     const idTwo = uuid();
     const clientOne = new WebSocket(`ws://localhost:8080?id=${idOne}`);
