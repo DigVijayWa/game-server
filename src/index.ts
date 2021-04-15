@@ -1,19 +1,22 @@
 import express from "express";
-import expressWs from "express-ws";
 import WebSocket, { Server /* etc */ } from "ws";
 
-import { ConnectedClients, Packet } from "./types/Types";
 import { getDataFromMessage, encodePlayerMessage } from "./utility/Utility";
 import { ConnectedClientList } from "./network/ConnectedClientList";
 import { processMessage } from "./processor/MessageProcessor";
+import http from "http";
 
-const { app, getWss, applyTo } = expressWs(express());
+const app  = express();
 
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 const connectedClientList = new ConnectedClientList([]);
 
-app.ws("/connect", (ws, req) => {
+const server = http.createServer(app);
+
+const websocket = new WebSocket.Server({server});
+
+websocket.on("/connect", (ws, req) => {
 
   connectedClientList.addConnectedClients({
     webSocket: ws,
@@ -22,7 +25,7 @@ app.ws("/connect", (ws, req) => {
     validity: 10000,
   });
 
-  ws.on("message", async (message) => {
+  ws.on("message", async (message: string) => {
     // tslint:disable-next-line:no-console
     console.log("received: %s", message);
 
@@ -31,7 +34,7 @@ app.ws("/connect", (ws, req) => {
     processMessage(message.toString(), connectedClientList);
   });
 
-  ws.on("close", async (message) => {
+  ws.on("close", async (message: string) => {
     const playerData = await getDataFromMessage(message.toString());
 
     processMessage(message.toString(), connectedClientList);
@@ -69,7 +72,7 @@ setInterval(() => {
 
 // adding websocket.
 
-app.listen(port, () => {
+server.listen(port, () => {
   // tslint:disable-next-line:no-console
   console.log(`server started at http://localhost:${port}`);
 });
