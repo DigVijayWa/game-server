@@ -3,3 +3,5 @@ module.exports = {
     testEnvironment: 'node',
     roots: ["__tests__/integration/"],
   };
+
+  jest.setTimeout(10000);
