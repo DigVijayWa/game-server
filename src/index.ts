@@ -1,40 +1,56 @@
 import express from "express";
-import expressWs from "express-ws";
 import WebSocket, { Server /* etc */ } from "ws";
+import http from "http";
+import uuid from "uuid";
 
-import { ConnectedClients, Packet } from "./types/Types";
-import { getDataFromMessage, encodePlayerMessage } from "./utility/Utility";
+import { decodePlayerMessage } from "./utility/Utility";
 import { ConnectedClientList } from "./network/ConnectedClientList";
 import { processMessage } from "./processor/MessageProcessor";
 
-const { app, getWss, applyTo } = expressWs(express());
+const app = express();
 
-const port = 8080;
+const port = process.env.PORT || 8080;
 
 const connectedClientList = new ConnectedClientList([]);
 
-app.ws("/connect", (ws, req) => {
+const server = http.createServer(app);
+
+const websocket = new WebSocket.Server({ server });
+
+websocket.on("connection", (ws: WebSocket, req: http.IncomingMessage) => {
+
+  const id = req.url.split("/?id=")[1] || uuid.v4();
 
   connectedClientList.addConnectedClients({
     webSocket: ws,
-    id: req.query.id as string,
+    id,
     ipAddress: req.connection.remoteAddress,
     validity: 10000,
   });
 
-  ws.on("message", async (message) => {
+  // tslint:disable-next-line:no-console
+  console.log("connection request received %s", id);
+
+  ws.on("message", async (message: string) => {
     // tslint:disable-next-line:no-console
     console.log("received: %s", message);
 
-    const playerData = await getDataFromMessage(message.toString());
+    const playerData = await decodePlayerMessage(message.toString());
 
     processMessage(message.toString(), connectedClientList);
   });
 
-  ws.on("close", async (message) => {
-    const playerData = await getDataFromMessage(message.toString());
-
-    processMessage(message.toString(), connectedClientList);
+  ws.on("close", async (message: string) => {
+    try {
+      const playerData = await decodePlayerMessage(message.toString());
+      processMessage(message.toString(), connectedClientList);
+    } catch (e) {
+      // tslint:disable-next-line:no-console
+      console.log(
+        "Skipping the close message due to exception in parsing: %s",
+        message
+      );
+    }
   });
 });
 
@@ -67,9 +83,12 @@ setInterval(() => {
   );
 }, 1000);
 
-// adding websocket.
 
-app.listen(port, () => {
+app.get("/healthcheck", (_, res)=> {
+  res.send("OK");
+})
+
+server.listen(port, () => {
   // tslint:disable-next-line:no-console
   console.log(`server started at http://localhost:${port}`);
 });
