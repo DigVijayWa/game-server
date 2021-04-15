@@ -14,4 +14,4 @@ jobs:
         npm install
         npm run build
         npm start
-        npm run test
+        npm run integration-test
