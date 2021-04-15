@@ -54,10 +54,14 @@ export const decodePlayerMessage = async (message : string) => {
 
   const keyList = ["correlationId","type","id","data","length"];
 
+  if(Object.keys(parsedJson).length === 0) {
+    await Promise.reject(new Error(`Decoding error occured ${parsedJson}`));
+  }
+
   const errorKeys = keyList.filter(item => !(item in parsedJson));
 
   if(errorKeys.length > 0) {
-    throw new Error(`Decoding error occured ${errorKeys}`);
+    await Promise.reject(new Error(`Decoding error occured ${errorKeys}`));
   }
 
   return {
@@ -67,9 +71,4 @@ export const decodePlayerMessage = async (message : string) => {
     data: parsedJson.data,
     length: JSON.stringify(parsedJson.data).length
   }
-};
-
-export const getDataFromMessage = async (data: string) => {
-  const parsedJson = await JSON.parse(data);
-  return parsedJson;
 };
