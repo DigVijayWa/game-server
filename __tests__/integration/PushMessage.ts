@@ -3,6 +3,7 @@ import { v4 as uuid } from "uuid";
 import { Packet } from "../../src/types/Types";
 import {
   decodePlayerMessage,
+  encodePlayerData,
   encodePlayerMessage,
 } from "../../src/utility/Utility";
 import axios from "axios";
@@ -29,24 +30,31 @@ describe("🔥 Test if PACKET is sent across clients", () => {
     const idTwo = uuid();
     const clientOne = new WebSocket(`ws://localhost:8080?id=${idOne}`);
     const clientTwo = new WebSocket(`ws://localhost:8080?id=${idTwo}`);
+    const data  = { name: "PLAYER_ONE", xInput: 1, yInput: 2 };
 
     const packetPlayerOne: Packet = {
       type: "PLAYER_JOINED",
       correlationId: new Date().getTime(),
       id: idOne,
-      length: idOne.length,
-      data: { name: "PLAYER_ONE", xInput: 1, yInput: 2 },
+      length: encodePlayerData(data).length,
+      data,
     };
+
+    const objectMatcher = (packet1: Packet, packet2: Packet) => {
+      return packet1.correlationId === packet2.correlationId &&
+             packet1.id === packet2.id &&
+             packet1.data.name === packet2.data.name &&
+             packet1.data.xInput === packet2.data.xInput &&
+             packet1.data.yInput === packet2.data.yInput &&
+             packet1.length === packet2.length;
+    }
 
     const checkTimeAndExecute = (): Promise<boolean> => {
       return new Promise((resolve, reject) => {
         clientTwo.on("message", async (message: string) => {
           const playerPacket = await decodePlayerMessage(message);
-          
-          // tslint:disable-next-line:no-console
-          console.log("packet ", playerPacket, packetPlayerOne);
 
-          resolve(playerPacket === packetPlayerOne);
+          resolve(objectMatcher(playerPacket, packetPlayerOne));
         });
 
         clientOne.on("open", () => {

@@ -1,10 +1,10 @@
 import WebSocket, { Server /* etc */ } from "ws";
 import { v4 as uuid } from "uuid";
 
-describe.skip("🔥 Test if clients are closed after timeout", () => {
+describe("🔥 Test if clients are closed after timeout", () => {
 
     it("should test dead connections after timeout", async () => {
-        jest.setTimeout(10000);
+        jest.setTimeout(15000);
         const idOne = uuid();
         const idTwo = uuid();
         const idThree = uuid();
@@ -20,7 +20,7 @@ describe.skip("🔥 Test if clients are closed after timeout", () => {
                     clientTwo.readyState === clientTwo.CLOSED &&
                     clientThree.readyState === clientThree.CLOSED ?
                     resolve(true): reject(false);
-                }, 10100);
+                }, 11000);
             });
         }
 
