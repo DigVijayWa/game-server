@@ -42,6 +42,9 @@ describe("🔥 Test if PACKET is sent across clients", () => {
       return new Promise((resolve, reject) => {
         clientTwo.on("message", async (message: string) => {
           const playerPacket = await decodePlayerMessage(message);
+          
+          // tslint:disable-next-line:no-console
+          console.log("packet ", playerPacket, packetPlayerOne);
 
           resolve(playerPacket === packetPlayerOne);
         });

@@ -22,7 +22,7 @@ export const encodePlayerMessage = (playerMessage: Packet) => {
             "type": "${res.type}",
             "correlationId": ${res.correlationId},
             "id": "${res.id}",
-            "length": ${res.id.length},
+            "length": ${encodePlayerData(res.data).length},
             "data": ${encodePlayerData(res.data)}
         }`
     )
@@ -33,7 +33,7 @@ export const encodePlayerMessage = (playerMessage: Packet) => {
             "type": "${res.type}",
             "correlationId": ${res.correlationId},
             "id": "${res.id}",
-            "length": ${res.id.length},
+            "length": ${encodePlayerData(res.data).length},
             "data": ${encodePlayerData(res.data)}
         }`
     )
@@ -69,6 +69,6 @@ export const decodePlayerMessage = async (message : string) => {
     type: parsedJson.type,
     correlationId: parsedJson.correlationId,
     data: parsedJson.data,
-    length: JSON.stringify(parsedJson.data).length
+    length: encodePlayerData(parsedJson.data).length
   }
 };
