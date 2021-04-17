@@ -43,9 +43,7 @@ describe("🔥 Test if PACKET is sent across clients", () => {
         clientTwo.on("message", async (message: string) => {
           const playerPacket = await decodePlayerMessage(message);
 
-          playerPacket.id === packetPlayerOne.id
-            ? resolve(true)
-            : resolve(false);
+          resolve(playerPacket === packetPlayerOne);
         });
 
         clientOne.on("open", () => {
