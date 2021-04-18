@@ -1,12 +1,14 @@
 import WebSocket, { Server /* etc */ } from "ws";
 import { v4 as uuid } from "uuid";
+import axios from "axios";
+
 import { Packet } from "../../src/types/Types";
 import {
+  checkEquality,
   decodePlayerMessage,
   encodePlayerData,
   encodePlayerMessage,
 } from "../../src/utility/Utility";
-import axios from "axios";
 
 describe("🔥 Test if PACKET is sent across clients", () => {
 
@@ -40,21 +42,12 @@ describe("🔥 Test if PACKET is sent across clients", () => {
       data,
     };
 
-    const objectMatcher = (packet1: Packet, packet2: Packet) => {
-      return packet1.correlationId === packet2.correlationId &&
-             packet1.id === packet2.id &&
-             packet1.data.name === packet2.data.name &&
-             packet1.data.xInput === packet2.data.xInput &&
-             packet1.data.yInput === packet2.data.yInput &&
-             packet1.length === packet2.length;
-    }
-
     const checkTimeAndExecute = (): Promise<boolean> => {
       return new Promise((resolve, reject) => {
         clientTwo.on("message", async (message: string) => {
           const playerPacket = await decodePlayerMessage(message);
-
-          resolve(objectMatcher(playerPacket, packetPlayerOne));
+          
+          resolve(checkEquality(playerPacket, packetPlayerOne));
         });
 
         clientOne.on("open", () => {
@@ -62,7 +55,6 @@ describe("🔥 Test if PACKET is sent across clients", () => {
         });
 
         clientOne.on("error", () => reject(false));
-
         clientTwo.on("error", () => reject(false));
       });
     };
@@ -72,7 +64,6 @@ describe("🔥 Test if PACKET is sent across clients", () => {
     expect(result).toBe(true);
 
     clientOne.readyState === clientOne.OPEN ? clientOne.close() : undefined;
-
     clientTwo.readyState === clientTwo.OPEN ? clientTwo.close() : undefined;
   });
 });

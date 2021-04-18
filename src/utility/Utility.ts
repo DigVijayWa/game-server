@@ -1,6 +1,5 @@
 import { Packet, PlayerData } from "../types/Types";
-import { match, select } from "ts-pattern";
-import { parse } from "node:path";
+import { match } from "ts-pattern";
 
 export const encodePlayerMessage = (playerMessage: Packet) => {
   return match(playerMessage)
@@ -71,4 +70,14 @@ export const decodePlayerMessage = async (message : string) => {
     data: parsedJson.data,
     length: encodePlayerData(parsedJson.data).length
   }
+};
+
+
+export const checkEquality = (packetOne: Packet, packetTwo: Packet) => {
+  return packetOne.correlationId === packetTwo.correlationId &&
+             packetOne.id === packetTwo.id &&
+             packetOne.data.name === packetTwo.data.name &&
+             packetOne.data.xInput === packetTwo.data.xInput &&
+             packetOne.data.yInput === packetTwo.data.yInput &&
+             packetOne.length === packetTwo.length;
 };
